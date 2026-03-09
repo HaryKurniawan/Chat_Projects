@@ -1,90 +1,89 @@
-# Real-Time Chat Application
+# Aplikasi Chat Real-Time
 
-A full-stack real-time chat application built with React, Vite, Node.js, Express, Socket.IO, and Prisma.
+Aplikasi chat real-time full-stack yang dibangun menggunakan React, Vite, Node.js, Express, Socket.IO, dan Prisma.
 
-## Features
+## Fitur Utama
 
-- **User Authentication:** Secure explicit Register and Login with JWT authentication.
-- **Real-Time Messaging:** Instant messaging powered by Socket.IO for seamless communication.
-- **Admin Dashboard:** Specific page for admins to manage the application (ban/unban messages, manage users, etc.).
-- **Responsive UI:** Modern, clean, and responsive user interface built with Tailwind CSS v4, Radix UI, and Ant Design.
-- **Database Integrated:** Robust ORM integration using Prisma.
+- **Autentikasi Pengguna:** Sistem Register dan Login yang aman dengan autentikasi JWT.
+- **Pesan Real-Time:** Pengiriman pesan instan menggunakan Socket.IO untuk komunikasi yang lancar.
+- **Dashboard Admin:** Halaman khusus bagi admin untuk mengelola aplikasi (ban/unban pesan, manajemen pengguna, dll).
+- **UI Responsif:** Antarmuka pengguna yang modern, bersih, dan responsif menggunakan Tailwind CSS v4, Radix UI, dan Ant Design.
+- **Integrasi Database:** Integrasi ORM yang kokoh menggunakan Prisma.
 
-## Tech Stack
+## Teknologi (Tech Stack)
 
 ### Frontend
 
 - **React 19** & **Vite**
-- **Tailwind CSS v4** for styling
-- **Socket.IO Client** for real-time events
-- **React Router DOM** for navigation
-- **Radix UI** & **Ant Design** for accessible, customizable components
-- **Lucide React** for icons
+- **Tailwind CSS v4** untuk styling
+- **Socket.IO Client** untuk event real-time
+- **React Router DOM** untuk navigasi
+- **Radix UI** & **Ant Design** untuk komponen UI yang aksesibel dan mudah disesuaikan
+- **Lucide React** untuk ikon
 
 ### Backend
 
 - **Node.js** & **Express** server
-- **Prisma (ORM)** for database interactions
-- **Socket.IO Server** for real-time bidirectional event-based communication
-- **JSON Web Token (JWT)** & **bcrypt** for security and authentication
-- **Express Rate Limit** & **Helmet** for API protection
+- **Prisma (ORM)** untuk interaksi database
+- **Socket.IO Server** untuk komunikasi dua arah real-time
+- **JSON Web Token (JWT)** & **bcrypt** untuk keamanan dan autentikasi
+- **Express Rate Limit** & **Helmet** untuk perlindungan API
 
-## Project Structure
+## Struktur Proyek
 
-The repository is structured as a monorepo with two main folders:
+Repositori ini disusun sebagai monorepo dengan dua folder utama:
 
-- `/frontend` - Contains the React single-page application.
-- `/backend` - Contains the Express server, Socket.IO setup, and Prisma models.
+- `/frontend` - Berisi aplikasi single-page React.
+- `/backend` - Berisi server Express, konfigurasi Socket.IO, dan model Prisma.
+- `/.husky` - Konfigurasi Git Hooks (Linter & Commit Message Standard).
 
-## Getting Started
+## Memulai (Getting Started)
 
-### Prerequisites
+### Prasyarat
 
-- Node.js (v18+ recommended)
-- Database (PostgreSQL or MySQL depending on your Prisma configuration in backend)
+- Node.js (disarankan v18 ke atas)
+- Database (PostgreSQL atau MySQL sesuai konfigurasi Prisma di backend)
 
-### Installation & Setup
+### Instalasi & Setup
 
-1. **Clone the repository:**
+1. **Clone repositori:**
 
    ```bash
    git clone <repository-url>
    cd project_chat
    ```
 
-2. **Setup the Backend:**
+2. **Setup Backend:**
 
    ```bash
    cd backend
    npm install
 
-   # Duplicate the .env.example file and rename it to .env
+   # Duplikat file .env.example menjadi .env
    cp .env.example .env
 
-   # Update your .env variables, e.g., DATABASE_URL and JWT_SECRET
+   # Perbarui variabel di .env, contoh: DATABASE_URL dan JWT_SECRET
 
-   # Generate Prisma client and push the schema to your database
+   # Generate Prisma client dan push schema ke database Anda
    npx prisma generate
    npx prisma db push
 
-   # Start the development server
+   # Jalankan server pengembangan
    npm run dev
    ```
 
-3. **Setup the Frontend:**
+3. **Setup Frontend:**
 
    ```bash
    cd ../frontend
    npm install
 
-   # You can also configure environment variables in frontend/.env if necessary
-
-   # Start the React development server
+   # Jalankan server pengembangan React
    npm run dev
    ```
 
-## Usage
+## Penggunaan
 
-- Open your browser to the URL provided by Vite (e.g., `http://localhost:5173`).
-- Create an account or login.
-- Start chatting in real-time or access the Admin Page (`/admin`) for administrative privileges.
+- Buka browser ke URL yang diberikan oleh Vite (contoh: `http://localhost:5173`).
+- Buat akun atau login.
+- Mulai chat secara real-time atau akses Halaman Admin (`/admin`) jika memiliki hak akses administrator.
