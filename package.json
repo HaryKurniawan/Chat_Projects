@@ -1,0 +1,11 @@
+{
+  "name": "project_chat",
+  "private": true,
+  "scripts": {
+    "prepare": "husky .husky",
+    "commit": "node .husky/interactive-commit.cjs"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

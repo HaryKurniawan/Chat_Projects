@@ -5,5 +5,5 @@ if git diff --cached --name-only | grep -E '\.env($|\.)' | grep -v '\.env\.examp
   exit 1
 fi
 
-cd "simple_login_register" || exit 1
-npx lint-staged
+# Jalankan lint-staged di folder frontend
+cd frontend && npx lint-staged --concurrent false
