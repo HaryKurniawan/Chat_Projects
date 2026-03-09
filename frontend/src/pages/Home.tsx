@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { UserProfile } from '../types/api';
@@ -83,7 +84,7 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50 text-gray-500 text-lg font-medium">
-        Memuat data sesi Anda...
+        Memuat data sesi Anda..
       </div>
     );
   }

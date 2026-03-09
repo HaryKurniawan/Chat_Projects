@@ -83,6 +83,7 @@ export default defineConfig([
          Import
       ===================== */
 
+      'import/no-unresolved': 'off',
       'import/order': [
         'warn',
         {
