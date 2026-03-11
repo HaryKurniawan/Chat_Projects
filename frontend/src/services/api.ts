@@ -1,8 +1,8 @@
 import axios from 'axios';
+
 import type { LoginResponse, RegisterResponse, ProfileResponse } from '../types/api';
 
 /**
- * =============================================================
  * [OWASP A02 - Security Misconfiguration]
  * 
  * Hanya gunakan environment variable yang diawali VITE_ untuk
@@ -18,7 +18,6 @@ import type { LoginResponse, RegisterResponse, ProfileResponse } from '../types/
  * 
  * Catatan: API Key sekarang dikirim HANYA dari backend,
  * bukan dari frontend, untuk keamanan yang lebih baik.
- * =============================================================
  */
 const API_URL = import.meta.env.VITE_API_URL;
 

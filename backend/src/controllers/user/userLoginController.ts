@@ -8,28 +8,23 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
-    /**
-     * =============================================================
-     * [OWASP A05 - Injection]
-     * 
-     * Validasi bahwa input ada dan bertipe string.
+    /*
+     * [OWASP A05 - Injection] Validasi bahwa input ada dan bertipe string.
      * Ini mencegah injection via tipe data yang tidak diharapkan
      * seperti objek atau array yang bisa memanipulasi query.
-     * =============================================================
      */
+
     if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       res.status(400).json({ message: 'Email dan password wajib diisi!' });
       return;
     }
 
-    /**
-     * =============================================================
+    /*
      * [OWASP A05 - Injection]
-     * 
      * Validasi format email menggunakan regex sederhana.
      * Ini mencegah input berbahaya masuk ke database query.
-     * =============================================================
      */
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       res.status(400).json({ message: 'Format email tidak valid!' });
@@ -64,18 +59,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     /**
-     * =============================================================
      * [OWASP A07 - Authentication Failures]
      * 
-     * Menggunakan bcrypt.compare() untuk membandingkan password.
-     * bcrypt adalah salah satu algoritma hashing yang direkomendasikan
-     * karena memiliki "salt" bawaan dan adjustable work factor 
-     * yang membuatnya tahan terhadap brute force.
-     * 
+     * Menggunakan bcrypt.compare() untuk membandingkan password..
      * JANGAN PERNAH bandingkan password secara langsung:
-     * BAD:  if (password === user.password) ❌
-     * GOOD: bcrypt.compare(password, hash) ✅
-     * =============================================================
+     * BAD:  if (password === user.password) 
+     * GOOD: bcrypt.compare(password, hash) 
      */
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -166,16 +155,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     /**
-     * =============================================================
      * [OWASP A10 - Mishandling Exceptional Conditions]
-     * 
      * JANGAN kirim detail error ke client! 
      * SEBELUMNYA: res.status(500).json({ message: '...', error })
-     * Ini bisa mengekspos stack trace, query SQL, atau struktur 
-     * database yang sangat membantu attacker.
-     * 
      * SEKARANG: Kirim pesan generik, dan simpan detail di server log.
-     * =============================================================
      */
     logger.error('Error pada proses login', {
       error: error instanceof Error ? error.message : 'Unknown error',

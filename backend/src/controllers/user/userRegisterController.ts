@@ -8,13 +8,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const { name, email, password } = req.body;
 
     /**
-     * =============================================================
      * [OWASP A05 - Injection]
      * 
      * Validasi bahwa semua input ada dan bertipe string.
      * Input yang bukan string (misal: objek atau array) bisa
      * menyebabkan perilaku tidak terduga pada operasi database.
-     * =============================================================
      */
     if (!name || !email || !password || typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
       res.status(400).json({ message: 'Nama, email, dan password wajib diisi!' });
@@ -22,12 +20,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     /**
-     * =============================================================
      * [OWASP A05 - Injection]
      * 
      * Sanitasi input: trim whitespace untuk mencegah input
      * yang tampak valid tapi sebenarnya berisi spasi tersembunyi.
-     * =============================================================
      */
     const cleanName = name.trim();
     const cleanEmail = email.toLowerCase().trim();

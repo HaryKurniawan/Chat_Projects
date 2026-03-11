@@ -19,7 +19,34 @@
       =============================================================
     -->
     <meta name="referrer" content="no-referrer" />
+    <!--
+      =============================================================
+      [OWASP A05 - Security Misconfiguration (CSP)]
+      Content Security Policy (CSP) untuk mencegah Cross-Site Scripting (XSS)
+      dan penyisipan data asing.
 
+      Penjelasan per baris:
+      - default-src 'none': Blokir SEMUA sumber daya secara default jika tidak dideklarasikan.
+      - script-src: Hanya izinkan script dari aplikasi sendiri & vite inline server.
+      - style-src: CSS internal + font dari Google (apis).
+      - font-src: File Font dari aplikasi lokal, Google Fonts (gstatic), dan tipe data bawaan React.
+      - img-src: Bebas memuat gambar internal web & objek blob (data:).
+      - connect-src: API Request hanya boleh ke URL backend sendiri (port 3000) dan web socket.
+      - base-uri: Mencegah attacker memanipulasi lokasi root URL dokumen.
+      - form-action: Mencegah Form disubmit menyasar ke domain asing.
+      =============================================================
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'none';
+      script-src 'self' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com data:;
+      img-src 'self' data:;
+      connect-src 'self' http://localhost:3000 ws://localhost:3000;
+      base-uri 'self';
+      form-action 'self';
+    "
+    />
     <!--
       =============================================================
       [OWASP A08 - Software/Data Integrity Failures]
