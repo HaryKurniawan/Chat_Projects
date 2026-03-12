@@ -3,9 +3,18 @@
   "private": true,
   "scripts": {
     "prepare": "husky .husky",
-    "commit": "node .husky/interactive-commit.cjs"
+    "commit": "cz"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
     "husky": "^9.1.7"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   }
 }

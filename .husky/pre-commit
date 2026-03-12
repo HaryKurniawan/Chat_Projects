@@ -6,4 +6,4 @@ if git diff --cached --name-only | grep -E '\.env($|\.)' | grep -v '\.env\.examp
 fi
 
 # Jalankan lint-staged di folder frontend
-cd frontend && npx lint-staged --concurrent false
+cd frontend && npx lint-staged --concurrent false --allow-empty
