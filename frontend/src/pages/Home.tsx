@@ -84,7 +84,7 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gray-50 text-gray-500 text-lg font-medium">
-        Memuat data sesi Anda..
+        Memuat data sesi Anda...
       </div>
     );
   }
