@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+
 import { authAPI } from '../services/api';
 import type { ApiErrorResponse } from '../types/api';
 
@@ -141,7 +142,7 @@ const Register: React.FC = () => {
         
         <form onSubmit={handleDaftar} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Nama (Name)</label>
+            <label htmlFor="register-name" className="text-sm font-medium text-gray-700">Nama (Name)</label>
             <input
               type="text"
               id="register-name"
@@ -155,7 +156,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label htmlFor="register-email" className="text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               id="register-email"
@@ -168,7 +169,7 @@ const Register: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Kata Sandi (Password)</label>
+            <label htmlFor="register-password" className="text-sm font-medium text-gray-700">Kata Sandi (Password)</label>
             <input
               type="password"
               id="register-password"

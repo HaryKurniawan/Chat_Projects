@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { ApiErrorResponse } from '../types/api';
@@ -104,7 +105,7 @@ const Login: React.FC = () => {
         
         <form onSubmit={handleMasuk} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label htmlFor="login-email" className="text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               id="login-email"
@@ -121,7 +122,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700">Kata Sandi (Password)</label>
+            <label htmlFor="login-password" className="text-sm font-medium text-gray-700">Kata Sandi (Password)</label>
             <input
               type="password"
               id="login-password"

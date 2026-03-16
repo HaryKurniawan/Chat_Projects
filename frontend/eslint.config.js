@@ -75,6 +75,9 @@ export default defineConfig([
       'react/self-closing-comp': 'warn',
       'react/jsx-no-useless-fragment': 'warn',
       'react/jsx-key': 'error',
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       /* =====================
          Hooks
@@ -95,7 +98,23 @@ export default defineConfig([
           'newlines-between': 'always',
         },
       ],
-      'no-secrets/no-secrets': ['error', { tolerance: 3.2 }],
+      /* =====================
+         Hardcoded Secrets
+      ===================== */
+
+      'no-secrets/no-secrets': [
+        'error',
+        {
+          tolerance: 5,
+          additionalRegexes: {
+            'Hardcoded API Key': /(?:api[_-]?key|apikey)\s*[:=]\s*['"][^'"]{8,}['"]/i,
+            'Hardcoded Token': /(?:token|secret|jwt)\s*[:=]\s*['"][^'"]{8,}['"]/i,
+            'Hardcoded Password': /(?:password|passwd|pwd)\s*[:=]\s*['"][^'"]{3,}['"]/i,
+            'Bearer Token': /Bearer\s+[A-Za-z0-9\-._~+/]+=*/,
+            'Private Key': /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----/,
+          },
+        },
+      ],
     },
   },
 ])
