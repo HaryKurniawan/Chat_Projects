@@ -12,7 +12,6 @@ pipeline {
             steps {
                 // Menghapus folder node_modules jika terkunci oleh proses lain di Windows
                 bat 'if exist node_modules rmdir /s /q node_modules'
-                bat 'if exist backend\\node_modules rmdir /s /q backend\\node_modules'
                 bat 'if exist frontend\\node_modules rmdir /s /q frontend\\node_modules'
                 
                 // Bersihkan cache npm 
@@ -20,18 +19,19 @@ pipeline {
             }
         }
 
-        stage('Install Backend Dependencies') {
+        stage('Install Frontend Dependencies') {
             steps {
-                dir('backend') {
-                    bat 'npm install --no-fund --no-audit'
+                dir('frontend') {
+                    bat 'npm install --no-fund'
                 }
             }
         }
 
-        stage('Install Frontend Dependencies') {
+        stage('Lint & Audit Frontend') {
             steps {
                 dir('frontend') {
-                    bat 'npm install --no-fund --no-audit'
+                    bat 'npm run lint'
+                    bat 'npm audit'
                 }
             }
         }
@@ -46,7 +46,7 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --format XML --format HTML', odcInstallation: 'Default'
+                dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
         }

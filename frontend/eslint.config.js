@@ -10,12 +10,16 @@ import noUnsanitized from 'eslint-plugin-no-unsanitized'
 import react from 'eslint-plugin-react'
 import importPlugin from 'eslint-plugin-import'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import noSecrets from 'eslint-plugin-no-secrets'
 
 export default defineConfig([
   globalIgnores(['dist', 'eslint.config.js']),
 
   {
     files: ['**/*.{ts,tsx}'],
+    plugins: {
+      'no-secrets': noSecrets,
+    },
 
     extends: [
       js.configs.recommended,
@@ -91,6 +95,7 @@ export default defineConfig([
           'newlines-between': 'always',
         },
       ],
+      'no-secrets/no-secrets': ['error', { tolerance: 3.2 }],
     },
   },
 ])
