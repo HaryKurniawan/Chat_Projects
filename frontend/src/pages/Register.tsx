@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 
 import { authAPI } from '../services/api';
 import type { ApiErrorResponse } from '../types/api';
@@ -109,7 +109,7 @@ const Register: React.FC = () => {
        * [OWASP A10 - Mishandling Exceptional Conditions]
        * Tampilkan pesan error yang aman dan user-friendly.
        */
-      if (axios.isAxiosError(err)) {
+      if (isAxiosError(err)) {
         const axiosError = err as AxiosError<ApiErrorResponse>;
         setError(axiosError.response?.data?.message || 'Registrasi gagal, coba lagi nanti.');
       } else {

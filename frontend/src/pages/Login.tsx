@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios, { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 
 import { authAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
        * SQL error, dsb) yang bisa membantu attacker.
        * =============================================================
        */
-      if (axios.isAxiosError(err)) {
+      if (isAxiosError(err)) {
         const axiosError = err as AxiosError<ApiErrorResponse>;
         setError(axiosError.response?.data?.message || 'Login gagal, periksa email dan kata sandi Anda.');
       } else {
