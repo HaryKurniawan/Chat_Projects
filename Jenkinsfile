@@ -17,8 +17,7 @@ pipeline {
                 // Bersihkan cache npm 
                 bat 'npm cache clean --force'
 
-                bat 'rmdir /s /q dist'
-                bat 'rmdir /s /q node_modules'
+                bat 'rmdir /s /q frontend\\dist'
                 bat 'npm install --frozen-lockfile'
             }
         }
