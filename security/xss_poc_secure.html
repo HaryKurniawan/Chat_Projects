@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✅ XSS PoC — SECURE / MITIGATED Case (project_chat)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header { text-align: center; margin-bottom: 40px; }
+    header .badge {
+      display: inline-block;
+      background: #16a34a;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    header h1 { font-size: 28px; font-weight: 800; color: #f8fafc; }
+    header p { margin-top: 8px; color: #94a3b8; font-size: 14px; max-width: 600px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+    }
+    @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header .dot { width: 10px; height: 10px; border-radius: 50%; background: #16a34a; }
+    .card-header h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+    .card-header .subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .card-body { padding: 20px; }
+
+    .chat-container {
+      background: #efeae2;
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 180px;
+    }
+    .msg-bubble {
+      max-width: 80%;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px 12px 12px 2px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
+    .msg-bubble p { font-size: 14px; color: #1e293b; line-height: 1.6; }
+    .msg-bubble .meta { font-size: 10px; color: #94a3b8; margin-top: 4px; text-align: right; }
+    .msg-bubble .sender { font-size: 11px; font-weight: 700; color: #16a34a; margin-bottom: 4px; }
+
+    pre {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 12px;
+      color: #86efac;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+
+    .log-container {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #4ade80;
+      min-height: 100px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: #16a34a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn:hover { background: #15803d; }
+
+    .success-box {
+      background: #14532d;
+      border: 1px solid #16a34a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #86efac;
+    }
+    .success-box strong { color: #4ade80; }
+
+    .fix-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .fix-num {
+      background: #16a34a;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .fix-text { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+    .fix-text code { background: #0f172a; padding: 1px 5px; border-radius: 4px; color: #34d399; }
+
+    .tag {
+      display: inline-block;
+      background: #14532d;
+      border: 1px solid #16a34a;
+      color: #4ade80;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">✅ SECURE — MITIGATED</div>
+    <h1>XSS Mitigations Applied</h1>
+    <p>Demonstrates how DOMPurify sanitization, server-side authentication on Socket.IO, and input validation block the same attack chain.</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- ═══ Left: Mitigation Steps ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Mitigations Applied</h2>
+          <div class="subtitle">Fixes for VULN-01, VULN-02, VULN-03, VULN-04</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="fix-row">
+          <div class="fix-num">1</div>
+          <div class="fix-text">
+            <span class="tag">VULN-01 FIX</span><br/>
+            <strong>Authenticate Socket.IO connections</strong> using the session cookie at handshake. Derive <code>senderId</code> from the verified JWT, never from client payload.
+            <pre style="margin-top:8px; color:#86efac; font-size:11px;">
+io.use(async (socket, next) => {
+  const token = socket.handshake.headers.cookie
+    ?.match(/authToken=([^;]+)/)?.[1];
+  if (!token) return next(new Error('Unauthorized'));
+  const user = jwt.verify(token, process.env.JWT_SECRET);
+  socket.data.user = user; // Store verified user
+  next();
+});
+
+socket.on('sendMessage', async (data) => {
+  const senderId = socket.data.user.id; // ← Server-verified!
+  // ...
+});</pre>
+          </div>
+        </div>
+
+        <div class="fix-row">
+          <div class="fix-num">2</div>
+          <div class="fix-text">
+            <span class="tag">VULN-02 FIX</span><br/>
+            <strong>Remove role from register body.</strong> Strip any role field from the input entirely.
+            <pre style="margin-top:8px; color:#86efac; font-size:11px;">
+// Remove the conditional role assignment:
+await prisma.user.create({
+  data: { name, email, password: hashedPassword },
+  // role defaults to 'USER' in the schema
+});</pre>
+          </div>
+        </div>
+
+        <div class="fix-row">
+          <div class="fix-num">3</div>
+          <div class="fix-text">
+            <span class="tag">VULN-03/04 FIX</span><br/>
+            <strong>Sanitize with DOMPurify</strong> before rendering any user-generated content, especially if rich text or markdown is added later.
+            <pre style="margin-top:8px; color:#86efac; font-size:11px;">
+import DOMPurify from 'dompurify';
+
+// In AdminMainArea.tsx & ChatMainArea.tsx:
+&lt;p dangerouslySetInnerHTML={{
+  __html: DOMPurify.sanitize(msg.content)
+}} /&gt;
+
+// DOMPurify strips all script/onerror payloads</pre>
+          </div>
+        </div>
+
+        <div class="fix-row">
+          <div class="fix-num">4</div>
+          <div class="fix-text">
+            <span class="tag">VULN-07 FIX</span><br/>
+            <strong>Validate message length</strong> on the socket handler server-side.
+            <pre style="margin-top:8px; color:#86efac; font-size:11px;">
+if (!content || typeof content !== 'string'
+    || content.length > 2000) {
+  socket.emit('error', 'Invalid message');
+  return;
+}</pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ Right: Secure Demo ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Secure Rendering Demo</h2>
+          <div class="subtitle">DOMPurify strips the payload before DOM insertion</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="chat-container" id="secure-chat"></div>
+
+        <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+          <button class="btn" onclick="simulateSecureXSS()">
+            🛡 Test with Payload (Blocked)
+          </button>
+          <button class="btn" style="background: #475569" onclick="resetSecure()">
+            ↺ Reset
+          </button>
+        </div>
+
+        <div class="success-box">
+          <strong>✅ Result:</strong> DOMPurify sanitizes the <code>&lt;img onerror&gt;</code> payload into an empty string. The XSS does not fire. The message is either blank or shows sanitized text.
+        </div>
+
+        <div style="margin-top: 12px;">
+          <div style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600;">DEFENSE LOG</div>
+          <div class="log-container" id="defense-log">Waiting for test...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Bottom: Fixed Code ═══ -->
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Code Diff — Before vs After</h2>
+          <div class="subtitle">Minimal changes, maximum impact</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div>
+            <div style="font-size: 11px; color: #dc2626; font-weight: 700; margin-bottom: 8px;">❌ INSECURE (Before)</div>
+            <pre style="color: #fca5a5;">
+// ChatMainArea.tsx & AdminMainArea.tsx
+
+&lt;p&gt;{msg.content}&lt;/p&gt;
+
+// index.ts Socket handler
+socket.on('sendMessage', async (data) => {
+  const { senderId, receiverId, content } = data;
+  // No auth check, no validation
+  await prisma.message.create({
+    data: { senderId, receiverId, content }
+  });
+});
+
+// userRegisterController.ts
+await prisma.user.create({
+  data: {
+    name, email, password: hashedPassword,
+    ...(req.body.role === 'ADMIN'
+      ? { role: 'ADMIN' } : {}),
+  }
+});
+            </pre>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #16a34a; font-weight: 700; margin-bottom: 8px;">✅ SECURE (After)</div>
+            <pre>
+// ChatMainArea.tsx & AdminMainArea.tsx
+import DOMPurify from 'dompurify';
+
+&lt;p dangerouslySetInnerHTML={{
+  __html: DOMPurify.sanitize(msg.content)
+}} /&gt;
+
+// index.ts — Auth at handshake
+io.use((socket, next) => {
+  const token = extractTokenFromCookie(socket);
+  socket.data.user = jwt.verify(token, JWT_SECRET);
+  next();
+});
+socket.on('sendMessage', async (data) => {
+  const senderId = socket.data.user.id; // ← Safe
+  await prisma.message.create({
+    data: { senderId, receiverId, content }
+  });
+});
+
+// userRegisterController.ts
+await prisma.user.create({
+  data: { name, email, password: hashedPassword }
+  // role defaults in schema — no client input
+});
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── DOMPurify CDN ─── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
+  <script>
+    const defLog = document.getElementById('defense-log');
+    const chat = document.getElementById('secure-chat');
+
+    const normalMessages = [
+      { sender: 'Alice', content: 'Halo Bob, ada yang bisa dibantu?', time: '10:21' },
+      { sender: 'Bob', content: 'Iya, mau tanya soal pesanan kemarin.', time: '10:22' },
+    ];
+
+    const attackPayload = '<img src=x onerror="alert(\'XSS!\')">';
+
+    function sanitize(str) {
+      // DOMPurify.sanitize removes dangerous HTML
+      if (typeof DOMPurify !== 'undefined') {
+        return DOMPurify.sanitize(str);
+      }
+      // Fallback: simple text escaping
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderNormal() {
+      chat.innerHTML = '';
+      normalMessages.forEach(m => {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.innerHTML = `
+          <div class="sender">${m.sender}</div>
+          <p>${sanitize(m.content)}</p>
+          <div class="meta">${m.time}</div>
+        `;
+        chat.appendChild(bubble);
+      });
+    }
+
+    function simulateSecureXSS() {
+      renderNormal();
+      const sanitized = sanitize(attackPayload);
+      defLog.textContent =
+        '[*] Attacker emitted sendMessage with XSS payload\n' +
+        '[*] Payload received: ' + attackPayload + '\n' +
+        '[*] DOMPurify.sanitize() applied...\n' +
+        '[*] Sanitized result: "' + sanitized + '"\n' +
+        '[✓] XSS BLOCKED — payload neutralized before DOM insertion';
+
+      setTimeout(() => {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.style.borderColor = '#16a34a';
+        bubble.style.borderWidth = '2px';
+        bubble.innerHTML = `
+          <div class="sender">⚠ Attack Attempt (Blocked)</div>
+          <p>${sanitized || '<em style="color:#94a3b8">[sanitized — empty output]</em>'}</p>
+          <div class="meta">10:23</div>
+        `;
+        chat.appendChild(bubble);
+      }, 1000);
+    }
+
+    function resetSecure() {
+      renderNormal();
+      defLog.textContent = 'Waiting for test...';
+    }
+
+    renderNormal();
+  </script>
+</body>
+</html>

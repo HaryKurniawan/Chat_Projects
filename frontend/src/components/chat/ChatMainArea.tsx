@@ -71,11 +71,31 @@ const ChatMainArea: React.FC<ChatMainAreaProps> = ({
                             : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none'
                         }`}
                       >
+                        {/* =========================================
+                            MODE AMAN (SECURE) - AKTIF
+                            React escape semua string menjadi teks biasa.
+                            Tag HTML dan script tidak akan tereksekusi.
+                        ========================================= */}
                         <p className="text-[15px] leading-relaxed break-words whitespace-pre-wrap">
                           {isBanned 
                             ? '🚫 [Pesan telah diblokir oleh Admin]' 
                             : msg.content}
                         </p>
+
+                        {/* =========================================
+                            MODE RENTAN (INSECURE / XSS) - DINONAKTIFKAN
+                            Untuk latihan XSS: 
+                        ========================================= */}
+                        {/* 
+                        {isBanned ? (
+                          <p className="text-[15px] leading-relaxed break-words whitespace-pre-wrap">🚫 [Pesan telah diblokir oleh Admin]</p>
+                        ) : (
+                          <p 
+                            className="text-[15px] leading-relaxed break-words whitespace-pre-wrap" 
+                            dangerouslySetInnerHTML={{ __html: msg.content }} 
+                          />
+                        )}
+                        */}
                         <div className={`flex justify-end items-center gap-1 mt-1 ${isBanned ? 'text-red-400' : 'text-gray-400'}`}>
                            <span className="text-[10px]">
                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AxiosError, isAxiosError } from 'axios';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { authAPI } from '../services/api';
 import type { ApiErrorResponse } from '../types/api';
@@ -12,6 +13,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   /**
@@ -168,19 +170,32 @@ const Register: React.FC = () => {
               autoComplete="email"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 relative">
             <label htmlFor="register-password" className="text-sm font-medium text-gray-700">Kata Sandi (Password)</label>
-            <input
-              type="password"
-              id="register-password"
-              value={kataSandi}
-              onChange={(e) => setKataSandi(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Buat kata sandi (min. 8 karakter, huruf + angka)"
-              required
-              autoComplete="new-password"
-              minLength={8}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="register-password"
+                value={kataSandi}
+                onChange={(e) => setKataSandi(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pr-10"
+                placeholder="Buat kata sandi (min. 8 karakter, huruf + angka)"
+                required
+                autoComplete="new-password"
+                minLength={8}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {/* 
               [OWASP A07 - Authentication Failures]
               Indikator kekuatan password untuk membantu user 

@@ -146,10 +146,10 @@ app.use(express.json({ limit: '10kb' }));
  * =============================================================
  */
 const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 menit
-  max: 100, // Maks 100 request per window
+  windowMs: 5 * 60 * 1000, // 5 menit
+  max: 500, // Maks 500 request per window
   message: {
-    message: 'Terlalu banyak request dari IP ini, coba lagi setelah 15 menit.',
+    message: 'Terlalu banyak request dari IP ini, coba lagi setelah 5 menit.',
   },
   standardHeaders: true,
   legacyHeaders: false,

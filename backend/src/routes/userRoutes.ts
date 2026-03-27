@@ -18,10 +18,10 @@ import rateLimit from 'express-rate-limit';
  * =============================================================
  */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 menit
-  max: 10,                  // Maks 10 percobaan per window
+  windowMs: 5 * 60 * 1000, // 5 menit
+  max: 50,                  // Maks 50 percobaan per window
   message: {
-    message: 'Terlalu banyak percobaan, coba lagi setelah 15 menit.',
+    message: 'Terlalu banyak percobaan, coba lagi setelah 5 menit.',
   },
   standardHeaders: true,
   legacyHeaders: false,

