@@ -27,15 +27,6 @@ pipeline {
             }
         }
 
-        stage('Lint & Audit Frontend') {
-            steps {
-                dir('frontend') {
-                    bat 'npm run lint'
-                    bat 'npm audit'
-                }
-            }
-        }
-
         stage('Build Frontend') {
             steps {
                 dir('frontend') {

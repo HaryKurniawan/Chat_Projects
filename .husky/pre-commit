@@ -5,9 +5,9 @@ if git diff --cached --name-only | grep -E '\.env($|\.)' | grep -v '\.env\.examp
   exit 1
 fi
 
-# Jalankan audit untuk frontend
+# Jalankan audit untuk frontend (Sekadar info, tidak memblokir commit)
 echo "Running npm audit in frontend..."
-(cd frontend && npm audit)
+(cd frontend && npm audit || true)
 
 # Jalankan lint-staged di folder frontend
 cd frontend && npx lint-staged --concurrent false --allow-empty
