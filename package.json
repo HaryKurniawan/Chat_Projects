@@ -10,11 +10,20 @@
     "@commitlint/config-conventional": "^20.4.3",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
   },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx}": [
+      "cd frontend && eslint --fix"
+    ],
+    "backend/**/*.{js,ts}": [
+      "cd backend && npx tsc --noEmit"
+    ]
   }
 }

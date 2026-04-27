@@ -38,11 +38,28 @@ pipeline {
             }
         }
 
+        // stage('OWASP Dependency Check') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
+        //         dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+        //     }
+        // }
+
         stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
-                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-            }
+    steps {
+        dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
+        dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+    }
+    post {
+        always {
+            publishHTML([
+                reportDir: 'dependency-check-report',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'OWASP Dependency Check Report'
+            ])
         }
+    }
+}
+ 
     }
 }

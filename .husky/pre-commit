@@ -1,13 +1,21 @@
-# Block ENV kecuali .env.example
+#!/bin/bash
 
-if git diff --cached --name-only | grep -E '\.env($|\.)' | grep -v '\.env\.example'; then
-  echo "ERROR: File .env tidak boleh di commit!"
+echo "🚀 Starting pre-commit checks..."
+
+# 1. Jalankan security scan
+bash scripts/security-scan.sh
+if [ $? -ne 0 ]; then
+  echo "❌ Security scan gagal. Commit dibatalkan."
   exit 1
 fi
 
-# Jalankan audit untuk frontend (Sekadar info, tidak memblokir commit)
-echo "Running npm audit in frontend..."
-(cd frontend && npm audit || true)
+# 2. Jalankan lint-staged (Eslint frontend & Type-check backend)
+echo "🧹 Running lint-staged..."
+npx lint-staged
+if [ $? -ne 0 ]; then
+  echo "❌ Linting atau type-check gagal. Commit dibatalkan."
+  exit 1
+fi
 
-# Jalankan lint-staged di folder frontend
-cd frontend && npx lint-staged --concurrent false --allow-empty
+echo "✨ Semua pengecekan berhasil! Melanjutkan ke commit message..."
+exit 0
