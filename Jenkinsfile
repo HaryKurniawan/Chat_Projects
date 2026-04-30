@@ -29,14 +29,8 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML([
-                        reportDir: 'frontend',
-                        reportFiles: 'eslint-report.html',
-                        reportName: 'ESLint Frontend Security Report',
-                        keepAll: true,
-                        alwaysLinkToLastBuild: true,
-                        allowMissing: true
-                    ])
+                    // Menyimpan laporan sebagai artifact karena plugin HTML Publisher tidak tersedia
+                    archiveArtifacts artifacts: 'frontend/eslint-report.html', allowEmptyArchive: true
                 }
             }
         }
@@ -59,11 +53,8 @@ pipeline {
             }
             post {
                 always {
-                    publishHTML([
-                        reportDir: 'dependency-check-report',
-                        reportFiles: 'dependency-check-report.html',
-                        reportName: 'OWASP Dependency Check Report'
-                    ])
+                    // Menyimpan laporan sebagai artifact karena plugin HTML Publisher tidak tersedia
+                    archiveArtifacts artifacts: 'dependency-check-report.html', allowEmptyArchive: true
                 }
             }
         }
