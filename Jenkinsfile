@@ -38,7 +38,6 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                // Catatan: Jika ini masih terlalu lama, Anda mungkin perlu memindahkannya ke pipeline terpisah (nightly build)
                 dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
                 dependencyCheckPublisher pattern: 'dependency-check-report.xml'
             }
