@@ -35,15 +35,6 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    // Pastikan folder dist bersih sebelum build
-                    bat 'if exist dist rmdir /s /q dist'
-                    bat 'npm run build'
-                }
-            }
-        }
 
         stage('OWASP Dependency Check') {
             steps {
