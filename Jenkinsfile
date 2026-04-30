@@ -30,6 +30,43 @@ pipeline {
             }
         }
 
+        stage('ESLint Security Scan') {
+            steps {
+                // Gunakan catchError agar pipeline lanjut ke stage berikutnya (OWASP) meskipun ada error linting
+                // Sehingga kita bisa melihat semua kerentanan secara bersamaan di akhir pipeline
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    dir('frontend') {
+                        bat 'npx eslint . --format html -o eslint-report.html'
+                    }
+                }
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    dir('backend') {
+                        bat 'npx eslint "src/**/*.{ts,js}" --format html -o eslint-report.html'
+                    }
+                }
+            }
+            post {
+                always {
+                    publishHTML([
+                        reportDir: 'frontend',
+                        reportFiles: 'eslint-report.html',
+                        reportName: 'ESLint Frontend Security Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true
+                    ])
+                    publishHTML([
+                        reportDir: 'backend',
+                        reportFiles: 'eslint-report.html',
+                        reportName: 'ESLint Backend Security Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true
+                    ])
+                }
+            }
+        }
+
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
