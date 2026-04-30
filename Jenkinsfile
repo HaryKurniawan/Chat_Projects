@@ -8,24 +8,35 @@ pipeline {
             }
         }
 
-        stage('Clean Workspace (Windows Fix)') {
-            steps {
-                // Menghapus folder node_modules jika terkunci oleh proses lain di Windows
-                bat 'if exist node_modules rmdir /s /q node_modules'
-                bat 'if exist frontend\\node_modules rmdir /s /q frontend\\node_modules'
-                
-                // Bersihkan cache npm 
-                bat 'npm cache clean --force'
-
-                bat 'if exist frontend\\dist rmdir /s /q frontend\\dist'
-                bat 'npm install --frozen-lockfile'
-            }
-        }
-
         stage('Install Frontend Dependencies') {
             steps {
                 dir('frontend') {
-                    bat 'npm install --no-fund'
+                    // Menggunakan 'npm ci' (Clean Install) jauh lebih cepat untuk CI/CD
+                    // daripada 'npm install' + menghapus node_modules/cache secara manual.
+                    bat 'npm ci --no-fund'
+                }
+            }
+        }
+
+        stage('ESLint Security Scan (Frontend)') {
+            steps {
+                dir('frontend') {
+                    // Menangkap error agar pipeline tetap lanjut ke stage OWASP jika ada celah
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        bat 'npx eslint . --format html -o eslint-report.html'
+                    }
+                }
+            }
+            post {
+                always {
+                    publishHTML([
+                        reportDir: 'frontend',
+                        reportFiles: 'eslint-report.html',
+                        reportName: 'ESLint Frontend Security Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                        allowMissing: true
+                    ])
                 }
             }
         }
@@ -33,33 +44,28 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
+                    // Pastikan folder dist bersih sebelum build
+                    bat 'if exist dist rmdir /s /q dist'
                     bat 'npm run build'
                 }
             }
         }
 
-        // stage('OWASP Dependency Check') {
-        //     steps {
-        //         dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
-        //         dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-        //     }
-        // }
-
         stage('OWASP Dependency Check') {
-    steps {
-        dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
-        dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-    }
-    post {
-        always {
-            publishHTML([
-                reportDir: 'dependency-check-report',
-                reportFiles: 'dependency-check-report.html',
-                reportName: 'OWASP Dependency Check Report'
-            ])
+            steps {
+                // Catatan: Jika ini masih terlalu lama, Anda mungkin perlu memindahkannya ke pipeline terpisah (nightly build)
+                dependencyCheck additionalArguments: '--scan ./frontend --format XML --format HTML', odcInstallation: 'Default'
+                dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+            }
+            post {
+                always {
+                    publishHTML([
+                        reportDir: 'dependency-check-report',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency Check Report'
+                    ])
+                }
+            }
         }
-    }
-}
- 
     }
 }
